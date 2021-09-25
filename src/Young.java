@@ -4,6 +4,7 @@ public class Young<T> {
     private Object[][] table;
     private int size;
     private final int max_size;
+    private int current_length;
     private int col;
     private int row;
     private Comparator<T> comparator = null;
@@ -19,6 +20,7 @@ public class Young<T> {
     public Young(int table_size) {
         this.size = 0;
         this.max_size = table_size * table_size;
+        this.current_length = 1;
         this.table = new Object[table_size][table_size];
         this.col = 0;
         this.row = 0;
@@ -30,7 +32,7 @@ public class Young<T> {
         }
     }
 
-    public Young(int table_size, Comparator<T> comparator){
+    public Young(int table_size, Comparator<T> comparator) {
         this(table_size);
         this.comparator = comparator;
     }
@@ -51,14 +53,29 @@ public class Young<T> {
     }
 
     public void pop() {
-        table[0][0] = MAX_VALUE;
+        if (row + col == 0) {
+            table[0][0] = table[current_length - 1][current_length - 1];
+        } else if (row > col) {
+            table[0][0] = table[row - 1][current_length - 1];
+            table[row - 1][current_length - 1] = MAX_VALUE;
+        } else {
+            table[0][0] = table[current_length - 1][col - 1];
+            table[current_length - 1][col - 1] = MAX_VALUE;
+        }
+
+        size--;
+
         moveRightDown(0, 0);
 
-        if (col - 1 >= 0 && table[table.length - 1][col - 1] == MAX_VALUE) {
-            col--;
-        }
-        if (row - 1 >= 0 && table[row - 1][table.length - 1] == MAX_VALUE) {
-            row--;
+        if (size < Math.pow(current_length - 1, 2)) {
+            col = row = --current_length - 1;
+        } else {
+            if (col - 1 >= 0 && table[current_length - 1][col - 1] == MAX_VALUE) {
+                col--;
+            }
+            if (row - 1 >= 0 && table[row - 1][current_length - 1] == MAX_VALUE) {
+                row--;
+            }
         }
     }
 
@@ -66,11 +83,11 @@ public class Young<T> {
         int i, j;
 
         if (row > col) {
-            i = table.length - 1;
+            i = current_length - 1;
             j = col;
         } else {
             i = row;
-            j = table.length - 1;
+            j = current_length - 1;
         }
 
         table[i][j] = elem;
@@ -78,11 +95,17 @@ public class Young<T> {
 
         moveLeftUp(i, j);
 
-        if (table[table.length - 1][col] != MAX_VALUE) {
-            col++;
-        }
-        if (table[row][table.length - 1] != MAX_VALUE) {
-            row++;
+        if (size == current_length * current_length && current_length < table.length) {
+            current_length++;
+            col = 0;
+            row = 0;
+        } else {
+            if (table[current_length - 1][col] != MAX_VALUE) {
+                col++;
+            }
+            if (table[row][current_length - 1] != MAX_VALUE) {
+                row++;
+            }
         }
     }
 
@@ -132,8 +155,8 @@ public class Young<T> {
         Object downElem;
 
         while (true) {
-            rightElem = (j + 1 < table.length) ? table[i][j + 1] : MAX_VALUE;
-            downElem = (i + 1 < table.length) ? table[i + 1][j] : MAX_VALUE;
+            rightElem = (j + 1 < current_length) ? table[i][j + 1] : MAX_VALUE;
+            downElem = (i + 1 < current_length) ? table[i + 1][j] : MAX_VALUE;
 
             if (compare(elem, rightElem) <= 0 && compare(elem, downElem) <= 0) break;
 
@@ -148,6 +171,7 @@ public class Young<T> {
                 table[++i][j] = elem;
             }
         }
+
     }
 
 //    -----------------------------------------------------------------------------
@@ -159,6 +183,22 @@ public class Young<T> {
 
     public Comparator<T> getComparator() {
         return comparator;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public int getCurrent_length() {
+        return current_length;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public int getCol() {
+        return col;
     }
 
     @Override

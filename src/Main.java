@@ -19,6 +19,10 @@ public class Main {
             }
 
             System.out.println(young.toString());
+            System.out.println("size: " + young.getSize());
+            System.out.println("current_length: " + young.getCurrent_length());
+            System.out.println("col: " + young.getCol());
+            System.out.println("row: " + young.getRow());
             System.out.println("is empty: " + young.empty());
             System.out.println("is full: " + young.full());
         }
